@@ -56,12 +56,24 @@ export default function Home() {
     fetchData();
   }, []);
 
+
+   // handle search
+   const handleSearch = (e) => {
+    setSearchQuery(e.target.value);
+    // console.log(searchQuery);
+  }
+
+  // Filtering the data entries based on the search query.
+const filteredData = searchQuery.trim() ? data.entries.filter(entry =>
+  entry.API.toLowerCase().includes(searchQuery.trim().toLowerCase())
+) : data.entries;
+
   // calculating the pagination data
-  const totalPages = Math.ceil(data.count / itemsPerPage);
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   // console.log(totalPages)
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = data.entries.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -98,7 +110,7 @@ export default function Home() {
     for (let number = 1; number <= totalPages; number++) {
       if (number === 1 || number === totalPages || (number >= leftSide && number <= rightSide)) {
         items.push(
-          <PaginationItem key={number} active={number === currentPage}>
+          <PaginationItem key={number}>
             <PaginationLink href="#" onClick={(e) => handlePageChange(e, number)} className="bg-white">
               {number}
             </PaginationLink>
@@ -140,13 +152,8 @@ export default function Home() {
   const handlePageChange = (e, number) => {
     e.preventDefault();
     setCurrentPage(number);
-  };
+  };  
 
-  // handling user search
-  // const filteredData = data.filter(entry =>
-  //   entry.API.toLowerCase().includes(searchQuery.toLowerCase())
-  // );
-  
 
   return (
     // <main className="flex min-h-screen flex-wrap items-center justify-between p-24">
@@ -157,8 +164,8 @@ export default function Home() {
   type="text"
   placeholder="Search APIs..."
   value={searchQuery}
-  onChange={(e) => setSearchQuery(e.target.value)}
-  className="search-input py-3 px-10"
+  onChange={handleSearch}
+  className="search-input py-3 px-10 rounded-sm"
 />
 
       </div>
@@ -177,15 +184,15 @@ export default function Home() {
       ) : (<div className="grid md:grid-cols-3 sm:grid-cols-2 xs:grid-cols-1 gap-4">
 
         {currentItems.map((entry, index) => (
-          <Card key={entry.API}>
+          <Card key={`${entry.API}-${index}`}>
             <CardHeader>
               <CardTitle>{entry.API}</CardTitle>
               <CardDescription>
-                <div className="flex gap-3">
-                  {entry.Auth !== "" ? (<p>Auth: {entry.Auth}</p>) : ""}
-                  {entry.Cors !== "yes" ? (<p>Cors: No</p>) : (<p>Cors: Yes</p>)}
-                  {entry.HTTPS === true ? (<p>HTTPS: True</p>) : ""}
-                </div>
+                <span className="flex gap-3">
+                  {entry.Auth !== "" ? (<span>Auth: {entry.Auth}</span>) : ""}
+                  {entry.Cors !== "yes" ? (<span>Cors: No</span>) : (<span>Cors: Yes</span>)}
+                  {entry.HTTPS === true ? (<span>HTTPS: True</span>) : ""}
+                </span>
               </CardDescription>
             </CardHeader>
             <CardContent>
